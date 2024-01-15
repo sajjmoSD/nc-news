@@ -3,35 +3,7 @@ const app = require("../app.js")
 const db = require("../db/connection.js");
 const seed = require("../db/seeds/seed.js")
 const data = require("../db/data/test-data");
-const endpointFormat = {
-    "GET /api": {
-      "description": "serves up a json representation of all the available endpoints of the api"
-    },
-    "GET /api/topics": {
-      "description": "serves an array of all topics",
-      "queries": [],
-      "exampleResponse": {
-        "topics": [{ "slug": "football", "description": "Footie!" }]
-      }
-    },
-    "GET /api/articles": {
-      "description": "serves an array of all articles",
-      "queries": ["author", "topic", "sort_by", "order"],
-      "exampleResponse": {
-        "articles": [
-          {
-            "title": "Seafood substitutions are increasing",
-            "topic": "cooking",
-            "author": "weegembump",
-            "body": "Text from the article..",
-            "created_at": "2018-05-30T15:59:13.341Z",
-            "votes": 0,
-            "comment_count": 6,
-          }
-        ]
-      }
-    }
-  } //So i can match the return object to skeleton object
+const endpointFormat = require("../endpoints.json") //So i can match the return object to skeleton object
 afterAll(()=>{
     return db.end();
 })
@@ -80,6 +52,53 @@ describe("app",()=>{
             .expect(404)
             .then((response)=>{
                 expect(response.statusCode).toBe(404)
+            })
+        })
+    })
+    describe("GET /api/articles/:article_id",()=>{
+        test("Status Code: 200 and should return the correct article by id (1)",()=>{
+            return request(app)
+            .get("/api/articles/1")
+            .expect(200)
+            .then(({body})=>{
+                const articleData = body
+                expect(articleData).toMatchObject(
+                    {
+                        title: "Living in the shadow of a great man",
+                        topic: "mitch",
+                    }
+                )
+            })
+        })
+        test("Status Code: 200 and should return the correct article by id (2)",()=>{
+            return request(app)
+            .get("/api/articles/2")
+            .expect(200)
+            .then(({body})=>{
+                const articleData = body
+                console.log(articleData,"<Test")
+                expect(articleData).toMatchObject(
+                    {
+                        title: "Sony Vaio; or, The Laptop",
+                        topic: "mitch",
+                    }
+                )
+            })
+        })
+        test("Status Code: 404 - sends appropriate status code and error message when given a valid but non-existent id",()=>{
+            return request(app)
+            .get("/api/articles/999")
+            .expect(404)
+            .then((response)=>{
+                expect(response.body.msg).toBe("Not Found")
+            })
+        })
+        test("Status Code: 400 - sends appropriate status code and error message when given an invalid id",()=>{
+            return request(app)
+            .get("/api/articles/helloWorld")
+            .expect(400)
+            .then((response)=>{
+                expect(response.body.msg).toBe("Bad Request")
             })
         })
     })
