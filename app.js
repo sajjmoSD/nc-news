@@ -14,7 +14,6 @@ app.get("/api/articles", getArticles)
 app.get("/api/articles/:article_id/comments", getArticleByIdAndComments)
 //error handling 
 app.use((err,req,res,next)=>{
-    console.log(err.code)
     if(err.msg === "Not Found"){
         res.status(404).send({msg: "Invalid ID present"})
     } else {
