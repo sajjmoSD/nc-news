@@ -15,3 +15,24 @@ exports.fetchArticleById = (article_id) => {
         }
     })
 }
+exports.fetchArticles = (sortBy = "created_at", order = 'desc') => {
+    const allowedOrders = ['asc', 'desc']
+    let sql = (`
+    SELECT 
+    articles.article_id,
+    articles.author,
+    articles.title,
+    articles.topic,
+    articles.created_at,
+    articles.votes,
+    articles.article_img_url,
+    COUNT(comments.comment_id) AS comment_count
+    FROM articles
+    LEFT JOIN comments ON articles.article_id = comments.article_id
+    GROUP BY articles.article_id`)
+    if(sortBy){
+        sql += ` ORDER BY ${sortBy} ${order}`
+    }
+    return db.query(sql)
+    
+}
