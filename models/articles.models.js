@@ -45,10 +45,11 @@ exports.fetchArticleByIdAndComments = (article_id) => {
     )
     .then((result)=>{
         if(result.rowCount === 0){
-            return Promise.reject({msg:"Not Found"})
+            return [];
         } else {
             return result.rows;
             
         }
+        
     })
 }
