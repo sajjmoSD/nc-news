@@ -2,9 +2,10 @@ const express = require("express")
 const {getTopics} = require("./controllers/topics.controllers")//controller
 const {getAPI} = require("./controllers/api.controllers");
 const {getArticleById, getArticles, getArticleByIdAndComments} = require("./controllers/articles.controllers")
+const {postComment} = require("./controllers/comments.controllers")
 
 const app = express(); 
-app.use(express.json()); //-> do not need just yet -> following from feedback
+app.use(express.json());
 //URL + method
 
 app.get("/api/topics", getTopics)
@@ -12,6 +13,7 @@ app.get("/api", getAPI)
 app.get("/api/articles/:article_id", getArticleById)
 app.get("/api/articles", getArticles)
 app.get("/api/articles/:article_id/comments", getArticleByIdAndComments)
+app.post("/api/articles/:article_id/comments", postComment)
 //error handling 
 app.use((err,req,res,next)=>{
     if(err.msg === "Not Found"){
@@ -36,4 +38,8 @@ app.use((err,req,res,next)=>{
     }
 })
 
+app.use((err,req,res,next)=>{
+    console.log({msg:err})
+    res.status(500).send({msg: err.msg})
+})
 module.exports = app;

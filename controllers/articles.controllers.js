@@ -21,7 +21,11 @@ exports.getArticles = (request, response, next) => {
 exports.getArticleByIdAndComments = (request, response, next) => {
     const {article_id} = request.params;
     fetchArticleByIdAndComments(article_id).then((comments)=>{
-        response.status(200).send({comments});
+        if(comments.length === 0){
+            response.status(200).send({comments, msg: "No comments for this article"})
+        } else {
+            response.status(200).send({comments})
+        }
     })
     .catch((err)=>{
         next(err)

@@ -4,6 +4,7 @@ const db = require("../db/connection.js");
 const seed = require("../db/seeds/seed.js")
 const data = require("../db/data/test-data");
 const endpointFormat = require("../endpoints.json") //So i can match the return object to skeleton object
+const commentsFormat = require("../db/data/test-data/comments.js")
 const toBeSorted = require("jest-sorted")
 afterAll(()=>{
     return db.end();
@@ -166,14 +167,15 @@ describe("app",()=>{
                 expect(typeof comment.created_at).toBe("string")
                })
                expect(comments).toBeSorted("created_at")
+               expect(comments.length).toBe(11)
             })
         })
         test("Status Code: 404 - sends appropriate status code and error message when given a valid but non-existent id",()=>{
             return request(app)
             .get("/api/articles/999/comments")
-            .expect(404)
+            .expect(200)
             .then((response)=>{
-                expect(response.body.msg).toBe("Invalid ID present")
+                expect(response.body.msg).toBe("No comments for this article")
             })
         })
         test("Status Code: 400 - sends appropriate status code and error message when given an invalid id",()=>{
@@ -183,6 +185,70 @@ describe("app",()=>{
             .then((response)=>{
                 expect(response.body.msg).toBe("Bad Request")
             })
+        })
+        test("Status Code: 200 when article exists but no comments for it should respond with empty array",()=>{
+            return request(app)
+            .get("/api/articles/2/comments")
+            .expect(200)
+            .then(({body})=>{
+                expect(body.comments).toEqual([])
+            })
+        })
+        describe("POST /api/articles/:article_id/comments",()=>{
+            test("Status Code: 201 - Should insert new comment using the specific article ID",()=>{
+                const newComment = {
+                    username: "butter_bridge",
+                    body: "This is a newly inserted comment"
+                };
+                return request(app)
+                .post("/api/articles/2/comments")
+                .send(newComment)
+                .expect(201)
+                .then(({body})=>{
+                    expect(body.comments).toMatchObject({
+                        body: "This is a newly inserted comment"
+                    })
+
+                })
+            })
+            test("Status Code: 400 - should respond with appropriate error message if missing a username",()=>{
+                const newComment = {
+                    body: "This is a newly inserted comment"
+                };
+                return request(app)
+                .post("/api/articles/1/comments")
+                .send(newComment)
+                .expect(400)
+                .then(({ body })=>{
+                    expect(body.error).toBe("username required")
+                })
+            })
+            test("Status Code: 400 - should respond with appropriate error message if missing a body",()=>{
+                const newComment = {
+                    username: "butter_bridge"
+                };
+                return request(app)
+                .post("/api/articles/1/comments")
+                .send(newComment)
+                .expect(400)
+                .then(({ body })=>{
+                    expect(body.error).toBe("body required")
+                })
+            })
+            test("Status Code: 400 - If foreign key is violated (author not found)",()=>{
+                const newComment = {
+                    username: "SantaClaus",
+                    body: "This is a comment with an author that does not exist"
+                };
+                return request(app)
+                .post("/api/articles/1/comments")
+                .send(newComment)
+                .expect(400)
+                .then(({ body })=>{
+                    expect(body.error).toBe("Author Not Found")
+                })
+            })
+
         })
     })
 })
