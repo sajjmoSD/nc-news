@@ -293,7 +293,6 @@ describe("app",()=>{
             })
             .expect(404)
             .then(({ body })=>{
-                console.log(body)
                 expect(body.msg).toBe("Article Not Found")
             })
         })
@@ -303,7 +302,6 @@ describe("app",()=>{
             .send({})
             .expect(400)
             .then(({ body })=>{
-                console.log(body)
                 expect(body.msg).toBe("Missing column")
             })
         })
