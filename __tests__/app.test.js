@@ -328,7 +328,6 @@ describe("app",()=>{
             .delete("/api/comments/mango")
             .expect(400)
             .then(({body})=>{
-                console.log(body)
                 expect(body.msg).toBe("Bad Request")
             })
         })
