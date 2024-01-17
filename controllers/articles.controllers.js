@@ -41,8 +41,6 @@ exports.updateArticleVotes = (request, response, next) => {
         return response.status(404).send({msg: "Article Not Found"})
       } 
         response.status(200).send({article: updatedArticle})
-
-      
     })
     .catch((err)=>{
         next(err)

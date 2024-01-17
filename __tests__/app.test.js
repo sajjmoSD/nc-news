@@ -306,5 +306,32 @@ describe("app",()=>{
             })
         })
     })
+    describe("DELETE /api/comments/:comment_id",()=>{
+        test("Status Code: 204 - Correct status code and empty object to be returned when deleting",()=>{
+            return request(app)
+            .delete("/api/comments/1")
+            .expect(204)
+            .then(({body})=>{
+                expect(body).toEqual({})
+            })
+        })
+        test("Status Code: 404 - Responds with appropriate error message and code when valid but non-existent ID is inputted",()=>{
+            return request(app)
+            .delete("/api/comments/999")
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("comment ID does not exist")
+            })
+        })
+        test("Status Code: 404 - Responds with appropriate error message and code when invalid ID is inputted",()=>{
+            return request(app)
+            .delete("/api/comments/mango")
+            .expect(400)
+            .then(({body})=>{
+                console.log(body)
+                expect(body.msg).toBe("Bad Request")
+            })
+        })
+    })
     
 })
