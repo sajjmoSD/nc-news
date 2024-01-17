@@ -5,6 +5,7 @@ const seed = require("../db/seeds/seed.js")
 const data = require("../db/data/test-data");
 const endpointFormat = require("../endpoints.json") //So i can match the return object to skeleton object
 const commentsFormat = require("../db/data/test-data/comments.js")
+const usersFormat = require("../db/data/test-data/users.js")
 const toBeSorted = require("jest-sorted")
 afterAll(()=>{
     return db.end();
@@ -329,6 +330,30 @@ describe("app",()=>{
             .expect(400)
             .then(({body})=>{
                 expect(body.msg).toBe("Bad Request")
+            })
+        })
+    })
+    describe("GET /api/users",()=>{
+        test("Status Code: 200 - Should respond with correct status code and an array of user objects",()=>{
+            return request(app)
+            .get("/api/users")
+            .expect(200)
+            .then(({body})=>{
+                const users = body.users.rows;
+                users.forEach((user)=>{
+                    expect(typeof user.username).toBe("string")
+                    expect(typeof user.name).toBe("string")
+                    expect(typeof user.avatar_url).toBe("string")
+                })
+                expect(users).toMatchObject(usersFormat)
+            })
+        })
+        test("Status Code: 404 if URL is spelt incorrectly", ()=>{
+            return request(app)
+            .get("/api/wrongURL")
+            .expect(404)
+            .then((response)=>{
+                expect(response.statusCode).toBe(404)
             })
         })
     })
