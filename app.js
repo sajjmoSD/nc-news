@@ -1,7 +1,7 @@
 const express = require("express")
 const {getTopics} = require("./controllers/topics.controllers")//controller
 const {getAPI} = require("./controllers/api.controllers");
-const {getArticleById, getArticles, getArticleByIdAndComments} = require("./controllers/articles.controllers")
+const {getArticleById, getArticles, getArticleByIdAndComments, updateArticleVotes} = require("./controllers/articles.controllers")
 const {postComment} = require("./controllers/comments.controllers")
 
 const app = express(); 
@@ -14,6 +14,7 @@ app.get("/api/articles/:article_id", getArticleById)
 app.get("/api/articles", getArticles)
 app.get("/api/articles/:article_id/comments", getArticleByIdAndComments)
 app.post("/api/articles/:article_id/comments", postComment)
+app.patch("/api/articles/:article_id", updateArticleVotes)
 //error handling 
 app.use((err,req,res,next)=>{
     if(err.msg === "Not Found"){
@@ -33,6 +34,13 @@ app.use((err,req,res,next)=>{
 app.use((err,req,res,next)=>{
     if(err.code === "42703"){
         res.status(400).send({msg: "Bad Request"})
+    } else {
+        next(err)
+    }
+})
+app.use((err,req,res,next)=>{
+    if(err.code === "23502"){
+        res.status(400).send({msg: "Missing column"})
     } else {
         next(err)
     }
