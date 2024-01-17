@@ -13,7 +13,6 @@ exports.postComment = (req,res,next) => {
     })
     .catch((err)=>{
         if(err.code === "23503"){
-            console.log(err)
             res.status(400).send({error: "Author Not Found"})
         }  else  {
             next(err)

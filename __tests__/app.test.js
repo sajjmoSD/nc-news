@@ -173,9 +173,9 @@ describe("app",()=>{
         test("Status Code: 404 - sends appropriate status code and error message when given a valid but non-existent id",()=>{
             return request(app)
             .get("/api/articles/999/comments")
-            .expect(200)
+            .expect(404)
             .then((response)=>{
-                expect(response.body.msg).toBe("No comments for this article")
+                expect(response.body.msg).toBe("Invalid ID or No Comments")
             })
         })
         test("Status Code: 400 - sends appropriate status code and error message when given an invalid id",()=>{
@@ -251,4 +251,60 @@ describe("app",()=>{
 
         })
     })
+    describe("PATCH /api/articles/:article_id",()=>{
+        test("Status Code: 200 - Should update the correct votes(1) in specific article id",()=>{
+            return request(app)
+            .patch("/api/articles/1")
+            .send({
+                inc_votes : 1
+            })
+            .expect(200)
+            .then(({body})=>{
+                expect(body.article.votes).toBe(101)
+            })
+        })
+        test("Status Code: 200 - Should update the correct votes(-100) in specific article id",()=>{
+            return request(app)
+            .patch("/api/articles/1")
+            .send({
+                inc_votes : -100
+            })
+            .expect(200)
+            .then(({body})=>{
+                expect(body.article.votes).toBe(0)
+            })
+        })
+        test("Status Code: 400 - Should respond with appropriate error code and message if user inputs invalid article ID",()=> {
+            return request(app)
+            .patch("/api/articles/one")
+            .send({
+                inc_votes: 5
+            })
+            .expect(400)
+            .then(({ body })=>{
+                expect(body.msg).toBe("Bad Request")
+            })
+        })
+        test("Status Code: 404 - Should respond with appropriate error code and message if user inputs valid but non-existent article ID",()=> {
+            return request(app)
+            .patch("/api/articles/999")
+            .send({
+                inc_votes: 5
+            })
+            .expect(404)
+            .then(({ body })=>{
+                expect(body.msg).toBe("Article Not Found")
+            })
+        })
+        test("Status Code: 400 - Should respond with appropriate error code and message if inc_votes is empty",()=> {
+            return request(app)
+            .patch("/api/articles/1")
+            .send({})
+            .expect(400)
+            .then(({ body })=>{
+                expect(body.msg).toBe("Missing column")
+            })
+        })
+    })
+    
 })

@@ -1,4 +1,5 @@
 const db = require("../db/connection")
+const { checkExists } = require("../db/seeds/utils")
 
 exports.fetchArticleById = (article_id) => {
     return db
@@ -36,20 +37,34 @@ exports.fetchArticles = (sortBy = "created_at", order = 'desc') => {
     }
     return db.query(sql)
 }
-exports.fetchArticleByIdAndComments = (article_id) => {
+exports.fetchArticleByIdAndComments =  (article_id) => {
     return db.query(`
     SELECT * FROM comments
     WHERE article_id = $1
     ORDER BY created_at DESC;
     `,[article_id]
     )
-    .then((result)=>{
+    .then(async (result)=>{
         if(result.rowCount === 0){
+            await checkExists('articles','article_id', article_id)
             return [];
-        } else {
+        } else{
             return result.rows;
-            
         }
-        
+    })
+    .catch((err)=>{
+        throw err
+    })
+    
+}
+exports.incrementArticleVotes = (article_id, newVotes) => {
+    return db.query(`
+    UPDATE articles
+    SET votes = votes + $1
+    WHERE article_id = $2
+    RETURNING *;
+    `, [newVotes, article_id])
+    .then((result)=>{
+        return result.rows[0]
     })
 }
