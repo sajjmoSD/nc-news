@@ -2,7 +2,7 @@ const express = require("express")
 const {getTopics} = require("./controllers/topics.controllers")//controller
 const {getAPI} = require("./controllers/api.controllers");
 const {getArticleById, getArticles, getArticleByIdAndComments, updateArticleVotes} = require("./controllers/articles.controllers")
-const {postComment} = require("./controllers/comments.controllers")
+const {postComment, deleteComment} = require("./controllers/comments.controllers")
 
 const app = express(); 
 app.use(express.json());
@@ -15,6 +15,7 @@ app.get("/api/articles", getArticles)
 app.get("/api/articles/:article_id/comments", getArticleByIdAndComments)
 app.post("/api/articles/:article_id/comments", postComment)
 app.patch("/api/articles/:article_id", updateArticleVotes)
+app.delete("/api/comments/:comment_id", deleteComment)
 //error handling 
 app.use((err,req,res,next)=>{
     if(err.msg === "Not Found"){
