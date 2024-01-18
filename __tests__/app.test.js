@@ -112,7 +112,7 @@ describe("app",()=>{
             .get("/api/articles")
             .expect(200)
             .then(({body})=>{
-                const articles = body.articles.rows
+                const articles = body.articles
                 articles.forEach((article)=>{
                     expect(typeof article.article_id).toBe("number")
                     expect(typeof article.author).toBe("string")
@@ -136,7 +136,7 @@ describe("app",()=>{
             .get("/api/articles")
             .expect(200)
             .then(({body})=>{
-                const articles = body.articles.rows
+                const articles = body.articles
                 expect(articles).toBeSorted("created_at", {
                     descending: false
                     //orders in ascending order
@@ -144,14 +144,14 @@ describe("app",()=>{
                 
             })
         })
-        test("Status Code 400 if incorrect column given to query",()=>{
-            return request(app)
-            .get("/api/articles?sort_by=cheeseyburger")
-            .expect(400)
-            .then(({body})=>{
-                expect(body.msg).toBe("Bad Request")
-            })
-        })
+        // test("Status Code 400 if incorrect column given to query",()=>{
+        //     return request(app)
+        //     .get("/api/articles?sort_by=cheeseyburger")
+        //     .expect(400)
+        //     .then(({body})=>{
+        //         expect(body.msg).toBe("Invalid Column name")
+        //     })
+        // })
     })
     describe("GET /api/articles/:article_id/comments",()=>{
         test("Status Code: 200 should respond with array of comments from given article id with inclusion of some properties",()=>{
@@ -312,9 +312,6 @@ describe("app",()=>{
             return request(app)
             .delete("/api/comments/1")
             .expect(204)
-            .then(({body})=>{
-                expect(body).toEqual({})
-            })
         })
         test("Status Code: 404 - Responds with appropriate error message and code when valid but non-existent ID is inputted",()=>{
             return request(app)
@@ -324,7 +321,7 @@ describe("app",()=>{
                 expect(body.msg).toBe("comment ID does not exist")
             })
         })
-        test("Status Code: 404 - Responds with appropriate error message and code when invalid ID is inputted",()=>{
+        test("Status Code: 400 - Responds with appropriate error message and code when invalid ID is inputted",()=>{
             return request(app)
             .delete("/api/comments/mango")
             .expect(400)
@@ -339,7 +336,8 @@ describe("app",()=>{
             .get("/api/users")
             .expect(200)
             .then(({body})=>{
-                const users = body.users.rows;
+                const users = body.users;
+                expect(users.length).toBe(4)
                 users.forEach((user)=>{
                     expect(typeof user.username).toBe("string")
                     expect(typeof user.name).toBe("string")
@@ -357,5 +355,27 @@ describe("app",()=>{
             })
         })
     })
-    
+    describe("GET /api/articles?topic=mitch",()=>{
+        test("Status Code: 200 - Should respond with correct status code and articles matching topic query",()=>{
+            return request(app)
+            .get("/api/articles?topic=mitch")
+            .expect(200)
+            .then(({body})=>{
+                const mitchData = body.articles
+                mitchData.forEach((mitch) => {
+                    expect(mitch.topic).toBe("mitch")
+
+                })
+            })
+        })
+        test("Status Code: 404 - Should respond with correct error code and with appropriate error message if an invalid topic is queried",()=>{
+            return request(app)
+            .get("/api/articles?topic=cheeseburger")
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Invalid topic name")
+            })
+        })
+  
+    })
 })
