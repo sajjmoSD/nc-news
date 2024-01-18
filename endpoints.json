@@ -11,6 +11,7 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles",
+    "description2": "should return sum of comments in addition to articles being sorted by date in descending order",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
@@ -43,5 +44,21 @@
       }
     ]
     }
+  },
+  "GET /api/articles/:article_id/comments":{
+    "description": "serves an array of comments for given article id"
+  },
+  "POST /api/articles/:article_id/comments":{
+    "description": "adds a new comment for given article id and responds with new comment object"
+  },
+  "PATCH /api/articles/:article_id":{
+    "description": "updates article votes by using article id and an incremenetVotes function"
+  },
+  "DELETE /api/comments/:comments_id":{
+    "description": "deletes given comment by using comment id"
+  },
+  "GET /api/users":{
+    "description": "serves an array of objects containing users details"
   }
+    
 }

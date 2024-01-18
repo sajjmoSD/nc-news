@@ -17,8 +17,15 @@ exports.fetchArticleById = (article_id) => {
         }
     })
 }
-exports.fetchArticles = (sortBy = "created_at", order = 'desc') => {
+exports.fetchArticles = (sortBy = "created_at", order = 'desc', topic) => {
     const allowedOrders = ['asc', 'desc']
+    const allowedSorts = ['created_at']
+    const allowedTopics = ["mitch", 'cats']
+    if(!allowedSorts.includes(sortBy)){
+        return Promise.reject({
+            msg: "Invalid Column name"
+        })
+    }
     let sql = (`
     SELECT 
     articles.article_id,
@@ -31,11 +38,28 @@ exports.fetchArticles = (sortBy = "created_at", order = 'desc') => {
     COUNT(comments.comment_id)::INT AS comment_count
     FROM articles
     LEFT JOIN comments ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id`)
+    `)
+    const sqlQueries = [];
+    if(topic){
+        sql += ` WHERE articles.topic = $1`;
+        sqlQueries.push(topic)
+    }
+    sql += ` GROUP BY articles.article_id`;
     if(sortBy){
         sql += ` ORDER BY ${sortBy} ${order}`
     }
-    return db.query(sql)
+    return db.query(sql, sqlQueries)
+    .then((result)=>{
+        if(result.rowCount === 0){
+            return Promise.reject
+            ({
+                status: 404, 
+                msg:"Invalid topic name"
+            })
+        } else {
+            return result.rows;
+        }
+    })
 }
 exports.fetchArticleByIdAndComments =  (article_id) => {
     return db.query(`
