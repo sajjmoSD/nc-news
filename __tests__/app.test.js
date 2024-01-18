@@ -6,6 +6,7 @@ const data = require("../db/data/test-data");
 const endpointFormat = require("../endpoints.json") //So i can match the return object to skeleton object
 const commentsFormat = require("../db/data/test-data/comments.js")
 const usersFormat = require("../db/data/test-data/users.js")
+const articleFormat = require("../db/data/test-data/articles.js")
 const toBeSorted = require("jest-sorted")
 afterAll(()=>{
     return db.end();
@@ -64,7 +65,7 @@ describe("app",()=>{
             .get("/api/articles/1")
             .expect(200)
             .then(({body})=>{
-                const article = body
+                const article = body.article
                 expect(article).toMatchObject(
                     {
                         title: "Living in the shadow of a great man",
@@ -79,7 +80,7 @@ describe("app",()=>{
             .get("/api/articles/2")
             .expect(200)
             .then(({body})=>{
-                const article = body
+                const article = body.article
                 expect(article).toMatchObject(
                     {
                         title: "Sony Vaio; or, The Laptop",
@@ -102,7 +103,7 @@ describe("app",()=>{
             .get("/api/articles/helloWorld")
             .expect(400)
             .then((response)=>{
-                expect(response.body.msg).toBe("Bad Request")
+                expect(response.body.msg).toBe("Invalid Datatype for ID")
             })
         })
     })
@@ -144,14 +145,14 @@ describe("app",()=>{
                 
             })
         })
-        // test("Status Code 400 if incorrect column given to query",()=>{
-        //     return request(app)
-        //     .get("/api/articles?sort_by=cheeseyburger")
-        //     .expect(400)
-        //     .then(({body})=>{
-        //         expect(body.msg).toBe("Invalid Column name")
-        //     })
-        // })
+        test("Status Code 400 if incorrect column given to query",()=>{
+            return request(app)
+            .get("/api/articles?sort_by=cheeseyburger")
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe("Invalid Column name")
+            })
+        })
     })
     describe("GET /api/articles/:article_id/comments",()=>{
         test("Status Code: 200 should respond with array of comments from given article id with inclusion of some properties",()=>{
@@ -184,7 +185,7 @@ describe("app",()=>{
             .get("/api/articles/WRONG!/comments")
             .expect(400)
             .then((response)=>{
-                expect(response.body.msg).toBe("Bad Request")
+                expect(response.body.msg).toBe("Invalid Datatype for ID")
             })
         })
         test("Status Code: 200 when article exists but no comments for it should respond with empty array",()=>{
@@ -283,7 +284,7 @@ describe("app",()=>{
             })
             .expect(400)
             .then(({ body })=>{
-                expect(body.msg).toBe("Bad Request")
+                expect(body.msg).toBe("Invalid Datatype for ID")
             })
         })
         test("Status Code: 404 - Should respond with appropriate error code and message if user inputs valid but non-existent article ID",()=> {
@@ -326,7 +327,7 @@ describe("app",()=>{
             .delete("/api/comments/mango")
             .expect(400)
             .then(({body})=>{
-                expect(body.msg).toBe("Bad Request")
+                expect(body.msg).toBe("Invalid Datatype for ID")
             })
         })
     })
@@ -362,6 +363,7 @@ describe("app",()=>{
             .expect(200)
             .then(({body})=>{
                 const mitchData = body.articles
+                expect(mitchData.length).toBe(12)
                 mitchData.forEach((mitch) => {
                     expect(mitch.topic).toBe("mitch")
 
@@ -377,5 +379,37 @@ describe("app",()=>{
             })
         })
   
+    })
+    describe("GET /api/articles/:article_id",()=>{
+        test("Status Code: 200 - Should respond with correct status code and include the comment count within the article response object",()=>{
+            return request(app)
+            .get("/api/articles/1")
+            .expect(200)
+            .then(({body})=>{
+                const article = body.article;
+                expect(article).toMatchObject({
+                    topic: 'mitch',
+                    comment_count: 11
+                })
+                expect(article.comment_count).toBe(11)
+                expect(article.article_id).toBe(1)
+            })
+        })
+        test("Status Code: 404 - Should respond with correct error code and message if id is valid but non-existent",()=>{
+            return request(app)
+            .get("/api/articles/1010")
+            .expect(404)
+            .then(({body})=>{
+                expect(body.msg).toBe('Invalid ID present')
+            })
+        })
+        test("Status Code: 404 - Should respond with correct error code and message if id is valid but non-existent",()=>{
+            return request(app)
+            .get("/api/articles/invalidDataType")
+            .expect(400)
+            .then(({body})=>{
+                expect(body.msg).toBe('Invalid Datatype for ID')
+            })
+        })
     })
 })

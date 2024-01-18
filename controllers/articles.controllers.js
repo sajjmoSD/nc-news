@@ -2,8 +2,8 @@ const {fetchArticleById, fetchArticles, fetchArticleByIdAndComments, incrementAr
 
 exports.getArticleById = (request,response,next) => {
     const { article_id } = request.params
-    fetchArticleById(article_id).then((articles)=>{
-        response.status(200).send(articles)
+    fetchArticleById(article_id).then((article)=>{
+        response.status(200).send({article: article})
     })
     .catch((err)=>{
         next(err)

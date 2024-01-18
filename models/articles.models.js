@@ -3,10 +3,21 @@ const { checkExists } = require("../db/seeds/utils")
 
 exports.fetchArticleById = (article_id) => {
     return db
-    .query(`SELECT * FROM articles
-                        WHERE article_id = $1;
-          `,[article_id]
-           )
+    .query(`SELECT
+                articles.article_id,
+                articles.author,
+                articles.title,
+                articles.topic,
+                articles.created_at,
+                articles.votes,
+                articles.article_img_url,
+                COUNT(comments.comment_id)::INT AS comment_count
+            FROM articles
+            LEFT JOIN comments ON articles.article_id = comments.article_id
+            WHERE articles.article_id = $1
+            GROUP BY articles.article_id;
+          `,[article_id] 
+        )
            
     .then((result)=>{
         if(result.rowCount === 0){
@@ -63,7 +74,8 @@ exports.fetchArticles = (sortBy = "created_at", order = 'desc', topic) => {
 }
 exports.fetchArticleByIdAndComments =  (article_id) => {
     return db.query(`
-    SELECT * FROM comments
+    SELECT * 
+    FROM comments
     WHERE article_id = $1
     ORDER BY created_at DESC;
     `,[article_id]
