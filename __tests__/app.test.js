@@ -41,7 +41,7 @@ describe("app",()=>{
     describe("GET /api",()=>{
         test("Status Code: 200 and should return api endpoints", () => {
             return request(app)
-            .get("/api/")
+            .get("/api")
             .expect(200)
             .then(({body})=>{
                 expect(endpointFormat).toMatchObject(body.apiEnd)
@@ -129,7 +129,6 @@ describe("app",()=>{
                     //orders in descending order
                     
                 })
-               
             })
         })
         test("Should sort the articles by date using ASC order",()=>{
@@ -160,14 +159,14 @@ describe("app",()=>{
             .get("/api/articles/1/comments")
             .expect(200)
             .then(({body})=>{
-               const comments = body.comments
-               comments.forEach((comment)=>{
+                const comments = body.comments
+                comments.forEach((comment)=>{
                 expect(typeof comment.comment_id).toBe("number")
                 expect(typeof comment.body).toBe("string")
                 expect(typeof comment.author).toBe("string")
                 expect(typeof comment.votes).toBe("number")
                 expect(typeof comment.created_at).toBe("string")
-               })
+             })
                expect(comments).toBeSorted("created_at")
                expect(comments.length).toBe(11)
             })
@@ -217,6 +216,7 @@ describe("app",()=>{
                 const newComment = {
                     body: "This is a newly inserted comment"
                 };
+                
                 return request(app)
                 .post("/api/articles/1/comments")
                 .send(newComment)
@@ -409,6 +409,48 @@ describe("app",()=>{
             .expect(400)
             .then(({body})=>{
                 expect(body.msg).toBe('Invalid Datatype for ID')
+            })
+        })
+    })
+    describe("GET /api/articles (sorting queries)",()=>{
+        test("Status Code: 200 - Should respond with articles sorted by votes (asc)",()=>{
+            return request(app)
+            .get("/api/articles")
+            .query({sort_by: 'votes', order: 'asc'})
+            .expect(200)
+            .then((response)=>{
+                const articles = response.body.articles
+                expect(articles).toBeSorted('votes', {ascending: true})
+            })
+        })
+        test("Status Code: 200 - Should respond with articles sorted by votes (desc)",()=>{
+            return request(app)
+            .get("/api/articles")
+            .query({sort_by: 'votes', order: 'desc'})
+            .expect(200)
+            .then((response)=>{
+                const articles = response.body.articles
+                expect(articles).toBeSorted('votes', {ascending: false})
+            })
+        })
+        test("Status Code: 200 - Should respond with articles sorted by title (desc)",()=>{
+            return request(app)
+            .get("/api/articles")
+            .query({sort_by: 'title', order: 'desc'})
+            .expect(200)
+            .then((response)=>{
+                const articles = response.body.articles
+                expect(articles).toBeSorted('title', {descending: true})
+            })
+        })
+        test("Status Code: 400 - Should respond with appropriate error code and message if column is invalid",()=>{
+            return request(app)
+            .get("/api/articles")
+            .query({sort_by: 'notAvailable'})
+            .expect(404)
+            .then((response)=>{
+                const articles = response.body.msg
+                expect(articles).toBe("Invalid Column name")
             })
         })
     })

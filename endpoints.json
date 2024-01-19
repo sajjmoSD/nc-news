@@ -59,6 +59,9 @@
   },
   "GET /api/users":{
     "description": "serves an array of objects containing users details"
+  },
+  "GET /api/articles?topic=mitch":{
+    "description": "This would return all articles matching the topic mitch or any other topics available"
   }
     
 }
