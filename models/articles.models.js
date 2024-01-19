@@ -10,9 +10,9 @@ exports.fetchArticleById = (article_id) => {
             LEFT JOIN comments ON articles.article_id = comments.article_id
             WHERE articles.article_id = $1
             GROUP BY articles.article_id;
-          `,[article_id] 
+            `,[article_id] 
         )
-           
+        
     .then((result)=>{
         if(result.rowCount === 0){
             return Promise.reject({msg:"Not Found"})
@@ -24,7 +24,7 @@ exports.fetchArticleById = (article_id) => {
 }
 exports.fetchArticles = (sortBy = "created_at", order = 'desc', topic) => {
     const allowedOrders = ['asc', 'desc']
-    const allowedSorts = ['created_at']
+    const allowedSorts = ['created_at', 'votes', 'title']
     const allowedTopics = ["mitch", 'cats']
     if(!allowedSorts.includes(sortBy)){
         return Promise.reject({
@@ -51,7 +51,7 @@ exports.fetchArticles = (sortBy = "created_at", order = 'desc', topic) => {
     }
     sql += ` GROUP BY articles.article_id`;
     if(sortBy){
-        sql += ` ORDER BY ${sortBy} ${order}`
+        sql += ` ORDER BY ${sortBy} ${allowedOrders.includes(order) ? order: "desc"}`
     }
     return db.query(sql, sqlQueries)
     .then((result)=>{

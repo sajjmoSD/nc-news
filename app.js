@@ -1,22 +1,11 @@
 const express = require("express")
-const {getTopics} = require("./controllers/topics.controllers")//controller
-const {getAPI} = require("./controllers/api.controllers");
-const {getArticleById, getArticles, getArticleByIdAndComments, updateArticleVotes} = require("./controllers/articles.controllers")
-const {postComment, deleteComment} = require("./controllers/comments.controllers")
-const {getUsers} = require("./controllers/users.controllers")
+const apiRouter= require("./routes/api-router")
 const app = express(); 
 app.use(express.json());
-//URL + method
+//Modular Routing
 
-app.get("/api/topics", getTopics)
-app.get("/api", getAPI)
-app.get("/api/articles/:article_id", getArticleById)
-app.get("/api/articles", getArticles)
-app.get("/api/articles/:article_id/comments", getArticleByIdAndComments)
-app.post("/api/articles/:article_id/comments", postComment)
-app.patch("/api/articles/:article_id", updateArticleVotes)
-app.delete("/api/comments/:comment_id", deleteComment)
-app.get("/api/users", getUsers)
+app.use('/api', apiRouter)
+
 //error handling 
 app.use((err,req,res,next)=>{
     if(err.msg === "Not Found"){
