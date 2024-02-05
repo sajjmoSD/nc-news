@@ -454,4 +454,20 @@ describe("app",()=>{
             })
         })
     })
+    describe("GET /api/users/:username", () => {
+        test("Status Code: 200 - Should respond with correct user object by using username ",()=>{
+            return request(app)
+            .get("/api/users/icellusedkars")
+            .expect(200)
+            .then((response)=>{
+                let user = response.body.user
+                user.forEach((u)=>{
+                    expect(u.username).toBe('icellusedkars')
+                    expect(u.name).toBe('sam')
+
+                })
+
+            })
+        })
+    })
 })
